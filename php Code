@@ -1,0 +1,57 @@
+//Change "/login" to your login page url
+
+
+function redirect_login_page() {
+$login_page = home_url( '/login/' );
+$page_viewed = basename($_SERVER['REQUEST_URI']);
+if( $page_viewed == "wp-login.php" && $_SERVER['REQUEST_METHOD'] == 'GET') {
+wp_redirect($login_page);
+exit;
+}
+}
+add_action('init','redirect_login_page');
+function login_failed() {
+$login_page = home_url( '/login/' );
+wp_redirect( $login_page . '?login=failed' );
+exit;
+}
+add_action( 'wp_login_failed', 'login_failed' );
+add_action( 'init', 'my_login_redirect' );
+function my_login_redirect() {
+$page_viewed1 = basename($_SERVER['REQUEST_URI']);
+$my_account_page = home_url( '/my-account/' );
+$my_login_page = home_url( '/login/' );
+if ( is_user_logged_in() ) {
+if ( $page_viewed1 == "login" ) {
+wp_redirect($my_account_page);
+exit();
+}
+}else{
+if ( $page_viewed1 == "my-account" ) {
+wp_redirect($my_login_page);
+exit();
+}
+}
+}
+function verify_username_password( $user, $username, $password ) {
+$login_page = home_url( '/login/' );
+if( $username == "" || $password == "" ) {
+wp_redirect( $login_page . "?login=true" );
+exit;
+}
+}
+add_filter( 'authenticate', 'verify_username_password', 1, 3);
+function logout_page() {
+$login_page = home_url( '/login/' );
+wp_redirect( $login_page . "?login=false" );
+exit;
+}
+add_action('wp_logout','logout_page');
+/**
+* Logout redirect
+*/
+add_action('wp_logout','auto_redirect_after_logout');
+function auto_redirect_after_logout(){
+wp_redirect( 'domain.com/login' );
+exit();
+}
